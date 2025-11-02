@@ -10,4 +10,6 @@ public interface ProfileService {
 
     ProfileResponse createProfile(ProfileRequest request);
 
+    void sendResetOtp(String email);
+
 }

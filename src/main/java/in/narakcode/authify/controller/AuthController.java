@@ -2,6 +2,7 @@ package in.narakcode.authify.controller;
 
 import in.narakcode.authify.dto.AuthRequest;
 import in.narakcode.authify.dto.AuthResponse;
+import in.narakcode.authify.service.ProfileService;
 import in.narakcode.authify.util.JwtUtil;
 import java.time.Duration;
 import java.util.HashMap;
@@ -21,17 +22,18 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequiredArgsConstructor
 public class AuthController {
 
   private final AuthenticationManager customAuthenticationManager;
-
   private final UserDetailsService userDetailsService;
-
   private final JwtUtil jwtUtil;
+  private final ProfileService profileService;
 
   @PostMapping("/login")
   public ResponseEntity<?> login(@RequestBody AuthRequest request) {
@@ -81,7 +83,18 @@ public class AuthController {
       @CurrentSecurityContext(expression = "authentication?.name") String email) {
 
     return ResponseEntity.ok(email != null);
-
   }
+
+
+  @PostMapping("/send-reset-otp")
+  public void sendResetOtp(@RequestParam String email) {
+    try {
+      profileService.sendResetOtp(email);
+    } catch (Exception e) {
+      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
+    }
+  }
+
+
 
 }
