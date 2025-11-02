@@ -1,0 +1,11 @@
+package in.narakcode.authify.service;
+
+
+import in.narakcode.authify.dto.ProfileRequest;
+import in.narakcode.authify.dto.ProfileResponse;
+
+public interface ProfileService {
+
+    ProfileResponse createProfile(ProfileRequest request);
+
+}
