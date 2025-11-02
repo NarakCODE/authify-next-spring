@@ -6,6 +6,8 @@ import in.narakcode.authify.dto.ProfileResponse;
 
 public interface ProfileService {
 
+    ProfileResponse getProfile(String email);
+
     ProfileResponse createProfile(ProfileRequest request);
 
 }

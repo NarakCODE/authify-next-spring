@@ -29,13 +29,15 @@ public class SecurityConfig {
 
   private final AppUserDetailsService appUserDetailsService;
   private final JwtRequestFilter jwtRequestFilter;
+  private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
 
   /**
    * Defines the main Spring Security filter chain.
    *
    * @param http HttpSecurity instance provided by Spring
-   * @return SecurityFilterChain that applies CORS, disables CSRF, defines allowed endpoints, sets
-   * stateless session, and disables logout.
+   * @return SecurityFilterChain that applies CORS, disables CSRF, defines allowed
+   *         endpoints, sets
+   *         stateless session, and disables logout.
    */
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -51,6 +53,7 @@ public class SecurityConfig {
             auth -> auth.requestMatchers("/login", "/register", "/send-reset-otp",
                 "/reset-password").permitAll()
                 .anyRequest().authenticated())
+        .exceptionHandling(ex -> ex.authenticationEntryPoint(customAuthenticationEntryPoint))
 
         // Add JWT filter before UsernamePasswordAuthenticationFilter
         .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)
@@ -86,7 +89,8 @@ public class SecurityConfig {
   }
 
   /**
-   * Provides the CORS configuration for the application. Specifies allowed origins, methods,
+   * Provides the CORS configuration for the application. Specifies allowed
+   * origins, methods,
    * headers, and credentials.
    *
    * @return UrlBasedCorsConfigurationSource with registered CORS settings
@@ -110,7 +114,8 @@ public class SecurityConfig {
    *
    * @param appUserDetailsService service that loads user details from database
    * @param passwordEncoder       encoder for hashing and verifying passwords
-   * @return AuthenticationManager that authenticates users via DaoAuthenticationProvider
+   * @return AuthenticationManager that authenticates users via
+   *         DaoAuthenticationProvider
    */
   @Bean("customAuthenticationManager")
   public AuthenticationManager customAuthenticationManager(
