@@ -2,7 +2,6 @@ package in.narakcode.authify.service;
 
 import in.narakcode.authify.entity.UserEntity;
 import in.narakcode.authify.repository.UserRepository;
-import java.util.ArrayDeque;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

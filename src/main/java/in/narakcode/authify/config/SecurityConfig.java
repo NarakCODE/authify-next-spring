@@ -1,5 +1,6 @@
 package in.narakcode.authify.config;
 
+import in.narakcode.authify.filter.JwtRequestFilter;
 import in.narakcode.authify.service.AppUserDetailsService;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
@@ -26,6 +28,7 @@ import org.springframework.web.filter.CorsFilter;
 public class SecurityConfig {
 
   private final AppUserDetailsService appUserDetailsService;
+  private final JwtRequestFilter jwtRequestFilter;
 
   /**
    * Defines the main Spring Security filter chain.
@@ -46,7 +49,11 @@ public class SecurityConfig {
         // Define which endpoints are publicly accessible
         .authorizeHttpRequests(
             auth -> auth.requestMatchers("/login", "/register", "/send-reset-otp",
-                "/reset-password").permitAll())
+                "/reset-password").permitAll()
+                .anyRequest().authenticated())
+
+        // Add JWT filter before UsernamePasswordAuthenticationFilter
+        .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)
 
         // Configure session management to be stateless (typical for REST APIs)
         .sessionManagement(

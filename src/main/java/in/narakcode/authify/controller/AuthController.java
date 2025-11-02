@@ -31,7 +31,6 @@ public class AuthController {
 
   private final JwtUtil jwtUtil;
 
-
   @PostMapping("/login")
   public ResponseEntity<?> login(@RequestBody AuthRequest request) {
 
@@ -39,8 +38,13 @@ public class AuthController {
       authenticate(request.getEmail(), request.getPassword());
       final UserDetails userDetails = userDetailsService.loadUserByUsername(request.getEmail());
       final String jwtToken = jwtUtil.generateToken(userDetails);
-      ResponseCookie cookie = ResponseCookie.from("jwt", jwtToken).httpOnly(true).path("/")
-          .maxAge(Duration.ofDays(1)).sameSite("Strict").build();
+      ResponseCookie cookie = ResponseCookie.from("jwt", jwtToken)
+          .httpOnly(true)
+          .path("/")
+          .maxAge(Duration.ofDays(1))
+          .sameSite("Strict")
+          .secure(false) // Set to true in production with HTTPS
+          .build();
 
       return ResponseEntity.ok().header(HttpHeaders.SET_COOKIE, cookie.toString())
           .body(new AuthResponse(request.getEmail(), jwtToken));
@@ -65,7 +69,6 @@ public class AuthController {
       return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
     }
   }
-
 
   private void authenticate(String email, String password) {
     customAuthenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, password));
