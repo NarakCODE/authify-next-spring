@@ -46,6 +46,7 @@ Railway automatically creates these environment variables:
 
 Click on your Spring Boot service → "Variables" tab → Add these:
 
+
 ```
 SPRING_PROFILES_ACTIVE=prod
 DB_URL=jdbc:mysql://${{MYSQL_HOST}}:${{MYSQL_PORT}}/${{MYSQL_DATABASE}}
