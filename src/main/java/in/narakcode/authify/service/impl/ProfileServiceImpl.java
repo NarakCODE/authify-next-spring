@@ -32,7 +32,7 @@ public class ProfileServiceImpl implements ProfileService {
   @Override
   public ProfileResponse getProfile(String email) {
     UserEntity existingUser = userRepository.findByEmail(email)
-        .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+        .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
     return convertToProfileResponse(existingUser);
   }
@@ -52,20 +52,20 @@ public class ProfileServiceImpl implements ProfileService {
 
   private ProfileResponse convertToProfileResponse(UserEntity newProfile) {
     return ProfileResponse.builder().name(newProfile.getName()).email(newProfile.getEmail())
-        .userId(newProfile.getUserId()).isAccountVerified(newProfile.isAccountVerified()).build();
+        .userId(newProfile.getUserId()).isAccountVerified(newProfile.getIsAccountVerified()).build();
   }
 
   private UserEntity convertToUserEntity(ProfileRequest request) {
     return UserEntity.builder().email(request.getEmail()).userId(UUID.randomUUID().toString())
         .name(request.getName()).password(passwordEncoder.encode(request.getPassword()))
-        .isAccountVerified(true).resetOtpExpireAt(0L).verifyOtp(null).verifyOtpExpireAt(0L)
+        .isAccountVerified(false).resetOtpExpireAt(0L).verifyOtp(null).verifyOtpExpireAt(0L)
         .resetOtp(null).build();
   }
 
   @Override
   public void sendResetOtp(String email) {
     UserEntity existingUser = userRepository.findByEmail(email)
-        .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+        .orElseThrow(() -> new UsernameNotFoundException("No account found with this email address"));
 
     // Generate 6 digit OTP
     String otp = String.valueOf(ThreadLocalRandom.current().nextInt(100000, 1000000));
@@ -83,7 +83,8 @@ public class ProfileServiceImpl implements ProfileService {
     try {
       emailService.sendResetOtpEmail(email, otp);
     } catch (Exception e) {
-      throw new RuntimeException("Unable to send mail");
+      throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
+          "Failed to send email. Please try again later");
     }
 
   }
@@ -92,21 +93,21 @@ public class ProfileServiceImpl implements ProfileService {
   @Override
   public void resetPassword(String email, String otp, String newPassword) {
     UserEntity existingUser = userRepository.findByEmail(email)
-        .orElseThrow(() -> new UsernameNotFoundException("User not found" + email));
+        .orElseThrow(() -> new UsernameNotFoundException("No account found with this email address"));
 
     // Validate the provided OTP
     if (existingUser.getResetOtp() == null || !existingUser.getResetOtp().equals(otp)) {
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid OTP");
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid OTP. Please check and try again");
     }
 
-    // Chcek if the OTP has expired
+    // Check if the OTP has expired
     if (System.currentTimeMillis() > existingUser.getResetOtpExpireAt()) {
       // Invalidate the OTP
-      existingUser.setResetOtp(otp);
+      existingUser.setResetOtp(null);
       existingUser.setResetOtpExpireAt(0L);
       userRepository.save(existingUser);
 
-      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "OTP has expired");
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "OTP has expired. Please request a new one");
     }
 
     // OTP is valid, proceed with password reset
@@ -124,6 +125,72 @@ public class ProfileServiceImpl implements ProfileService {
     } catch (Exception e) {
       log.warn("Unable to send password reset confirmation email to {}: {}", email, e.getMessage());
     }
+  }
+
+  @Override
+  public void sendOtp(String email) {
+    UserEntity existingUser = userRepository.findByEmail(email)
+        .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+    // If account is already verified, don't send OTP
+    if (Boolean.TRUE.equals(existingUser.getIsAccountVerified())) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Your account is already verified");
+    }
+
+    // Generate 6 digit OTP
+    String otp = String.valueOf(ThreadLocalRandom.current().nextInt(100000, 1000000));
+
+    // Calculate expiration time (current time + 24 hours in milliseconds)
+    long expirationTime = System.currentTimeMillis() + (24 * 60 * 60 * 1000);
+
+    // Update the user entity
+    existingUser.setVerifyOtp(otp);
+    existingUser.setVerifyOtpExpireAt(expirationTime);
+
+    userRepository.save(existingUser);
+
+    try {
+      emailService.sendOtpEmail(existingUser.getEmail(), otp);
+    } catch (Exception e) {
+      throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
+          "Failed to send verification email. Please try again later");
+    }
+  }
+
+  @Transactional
+  @Override
+  public void verifyOtp(String email, String otp) {
+    UserEntity existingUser = userRepository.findByEmail(email)
+        .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+    // Check if already verified
+    if (Boolean.TRUE.equals(existingUser.getIsAccountVerified())) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Your account is already verified");
+    }
+
+    // Validate the provided OTP
+    if (existingUser.getVerifyOtp() == null || !existingUser.getVerifyOtp().equals(otp)) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid OTP. Please check and try again");
+    }
+
+    // Check if the OTP has expired
+    if (System.currentTimeMillis() > existingUser.getVerifyOtpExpireAt()) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "OTP has expired. Please request a new one");
+    }
+
+    // OTP is valid, verify the account
+    existingUser.setIsAccountVerified(true);
+    existingUser.setVerifyOtp(null);
+    existingUser.setVerifyOtpExpireAt(0L);
+    userRepository.save(existingUser);
+  }
+
+  @Override
+  public String getLoggedInUserId(String email) {
+    UserEntity existingUser = userRepository.findByEmail(email)
+        .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+    return existingUser.getUserId();
   }
 
 }

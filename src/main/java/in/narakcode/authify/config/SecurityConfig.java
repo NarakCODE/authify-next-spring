@@ -51,7 +51,7 @@ public class SecurityConfig {
         // Define which endpoints are publicly accessible
         .authorizeHttpRequests(
             auth -> auth.requestMatchers("/login", "/register", "/send-reset-otp",
-                "/reset-password").permitAll()
+                "/reset-password", "/logout").permitAll()
                 .anyRequest().authenticated())
         .exceptionHandling(ex -> ex.authenticationEntryPoint(customAuthenticationEntryPoint))
 

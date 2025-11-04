@@ -27,7 +27,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequiredArgsConstructor
@@ -89,21 +88,37 @@ public class AuthController {
   }
 
   @PostMapping("/send-reset-otp")
-  public void sendResetOtp(@RequestParam String email) {
-    try {
-      profileService.sendResetOtp(email);
-    } catch (Exception e) {
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
-    }
+  public ResponseEntity<String> sendResetOtp(@RequestParam String email) {
+    profileService.sendResetOtp(email);
+    return ResponseEntity.ok("Password reset OTP sent successfully");
   }
 
   @PostMapping("/reset-password")
-  public void resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
-    try {
-      profileService.resetPassword(request.getEmail(), request.getOtp(), request.getNewPassword());
-    } catch (Exception e) {
-      throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
-    }
+  public ResponseEntity<String> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+    profileService.resetPassword(request.getEmail(), request.getOtp(), request.getNewPassword());
+    return ResponseEntity.ok("Password reset successfully");
+  }
+
+  @PostMapping("/send-otp")
+  public ResponseEntity<String> sendVerifyOtp(
+      @CurrentSecurityContext(expression = "authentication?.name") String email) {
+    profileService.sendOtp(email);
+    return ResponseEntity.ok("OTP sent successfully");
+  }
+
+  @PostMapping("/logout")
+  public ResponseEntity<String> logout() {
+    ResponseCookie cookie = ResponseCookie.from("jwt", "")
+        .httpOnly(true)
+        .path("/")
+        .maxAge(0)
+        .sameSite("Strict")
+        .secure(false) // Set to true in production with HTTPS
+        .build();
+
+    return ResponseEntity.ok()
+        .header(HttpHeaders.SET_COOKIE, cookie.toString())
+        .body("Logged out successfully");
   }
 
 }
