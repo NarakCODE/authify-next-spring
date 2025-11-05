@@ -17,3 +17,5 @@ export const SignInSchema = z.object({
       message: "Password must contain at least one number.",
     }),
 });
+
+export type SignInSchemaType = z.infer<typeof SignInSchema>;

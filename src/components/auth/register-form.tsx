@@ -12,44 +12,46 @@ import {
 import { Input } from "@/components/ui/input";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { SignInSchema, SignInSchemaType } from "@/schemas/sign-in-schema";
-import { useSignIn } from "@/hooks/use-sign-in";
+import { RegisterSchema } from "@/schemas/register-schema";
+import { z } from "zod";
+import { useRegister } from "@/hooks/use-register";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { LocaleLink } from "@/components/locale-link";
-import { authStorage } from "@/lib/auth";
 
-export function SignInForm({
+type RegisterFormData = z.infer<typeof RegisterSchema>;
+
+export function RegisterForm({
   className,
   ...props
 }: React.ComponentProps<"form">) {
   const router = useRouter();
-  const { mutate: signIn, isPending } = useSignIn();
+  const { mutate: register, isPending } = useRegister();
 
   const {
-    register,
+    register: registerField,
     handleSubmit,
     formState: { errors },
-  } = useForm<SignInSchemaType>({
-    resolver: zodResolver(SignInSchema),
+  } = useForm<RegisterFormData>({
+    resolver: zodResolver(RegisterSchema),
   });
 
-  const onSubmit = (data: SignInSchemaType) => {
-    signIn(data, {
+  const onSubmit = (data: RegisterFormData) => {
+    register(data, {
       onSuccess: (response) => {
-        // Store token
-        authStorage.setToken(response.token);
-
-        toast.success("Login successful!", {
-          description: `Welcome back, ${response.email}`,
+        toast.success("Account created successfully!", {
+          description: `Welcome ${response.name}! Please verify your email.`,
         });
-
-        // Redirect to dashboard
-        router.push("/dashboard");
+        // Store email in session storage for OTP verification
+        if (typeof window !== "undefined") {
+          sessionStorage.setItem("verifyEmail", data.email);
+        }
+        router.push(`/verify-otp?email=${encodeURIComponent(data.email)}`);
       },
       onError: (error) => {
-        toast.error("Login failed", {
-          description: error.message || "Email or password is incorrect.",
+        toast.error("Registration failed", {
+          description:
+            error.message || "Something went wrong. Please try again.",
         });
       },
     });
@@ -63,18 +65,33 @@ export function SignInForm({
     >
       <FieldGroup>
         <div className="flex flex-col items-center gap-1 text-center">
-          <h1 className="text-2xl font-bold">Login to your account</h1>
+          <h1 className="text-2xl font-bold">Create your account</h1>
           <p className="text-muted-foreground text-sm text-balance">
-            Enter your email below to login to your account
+            Fill in the form below to create your account
           </p>
         </div>
+        <Field>
+          <FieldLabel htmlFor="name">Full Name</FieldLabel>
+          <Input
+            id="name"
+            type="text"
+            placeholder="John Doe"
+            {...registerField("name")}
+            disabled={isPending}
+          />
+          {errors.name && (
+            <FieldDescription className="text-destructive">
+              {errors.name.message}
+            </FieldDescription>
+          )}
+        </Field>
         <Field>
           <FieldLabel htmlFor="email">Email</FieldLabel>
           <Input
             id="email"
             type="email"
             placeholder="m@example.com"
-            {...register("email")}
+            {...registerField("email")}
             disabled={isPending}
           />
           {errors.email && (
@@ -82,21 +99,19 @@ export function SignInForm({
               {errors.email.message}
             </FieldDescription>
           )}
+          {!errors.email && (
+            <FieldDescription>
+              We&apos;ll use this to contact you. We will not share your email
+              with anyone else.
+            </FieldDescription>
+          )}
         </Field>
         <Field>
-          <div className="flex items-center">
-            <FieldLabel htmlFor="password">Password</FieldLabel>
-            <LocaleLink
-              href="/forgot-password"
-              className="ml-auto text-sm underline-offset-4 hover:underline"
-            >
-              Forgot your password?
-            </LocaleLink>
-          </div>
+          <FieldLabel htmlFor="password">Password</FieldLabel>
           <Input
             id="password"
             type="password"
-            {...register("password")}
+            {...registerField("password")}
             disabled={isPending}
           />
           {errors.password && (
@@ -104,10 +119,15 @@ export function SignInForm({
               {errors.password.message}
             </FieldDescription>
           )}
+          {!errors.password && (
+            <FieldDescription>
+              Must be at least 8 characters long with letters and numbers.
+            </FieldDescription>
+          )}
         </Field>
         <Field>
           <Button type="submit" disabled={isPending}>
-            {isPending ? "Logging in..." : "Login"}
+            {isPending ? "Creating Account..." : "Create Account"}
           </Button>
         </Field>
         <FieldSeparator>Or continue with</FieldSeparator>
@@ -119,15 +139,15 @@ export function SignInForm({
                 fill="currentColor"
               />
             </svg>
-            Login with GitHub
+            Sign up with GitHub
           </Button>
-          <FieldDescription className="text-center">
-            Don&apos;t have an account?{" "}
+          <FieldDescription className="px-6 text-center">
+            Already have an account?{" "}
             <LocaleLink
-              href="/register"
+              href="/sign-in"
               className="text-primary hover:underline"
             >
-              Sign up
+              Sign in
             </LocaleLink>
           </FieldDescription>
         </Field>
