@@ -1,7 +1,7 @@
 "use client";
 
 import { LocaleType, SettingsType } from "@/types";
-import { createContext, useState, useCallback, useEffect } from "react";
+import { createContext, useState, useCallback } from "react";
 import { useCookie } from "react-use";
 
 export const defaultSettings: SettingsType = {
