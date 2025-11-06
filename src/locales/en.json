@@ -13,5 +13,22 @@
     "delete": "Delete",
     "edit": "Edit",
     "submit": "Submit"
+  },
+  "auth": {
+    "login": "Login",
+    "loginDescription": "Enter your email below to login to your account",
+    "email": "Email",
+    "emailPlaceholder": "m@example.com",
+    "password": "Password",
+    "forgotPassword": "Forgot your password?",
+    "loggingIn": "Logging in...",
+    "orContinueWith": "Or continue with",
+    "loginWithGitHub": "Login with GitHub",
+    "dontHaveAccount": "Don't have an account?",
+    "signUp": "Sign up",
+    "loginSuccessful": "Login successful!",
+    "welcomeBack": "Welcome back",
+    "loginFailed": "Login failed",
+    "emailOrPasswordIncorrect": "Email or password is incorrect."
   }
 }

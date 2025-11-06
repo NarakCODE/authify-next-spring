@@ -13,5 +13,22 @@
     "delete": "លុប",
     "edit": "កែសម្រួល",
     "submit": "ដាក់ស្នើ"
+  },
+  "auth": {
+    "login": "ចូលប្រើប្រាស់",
+    "loginDescription": "បញ្ចូលអ៊ីមែលរបស់អ្នកខាងក្រោមដើម្បីចូលប្រើប្រាស់គណនីរបស់អ្នក",
+    "email": "អ៊ីមែល",
+    "emailPlaceholder": "m@example.com",
+    "password": "ពាក្យសម្ងាត់",
+    "forgotPassword": "ភ្លេចពាក្យសម្ងាត់របស់អ្នក?",
+    "loggingIn": "កំពុងចូល...",
+    "orContinueWith": "ឬបន្តជាមួយ",
+    "loginWithGitHub": "ចូលជាមួយ GitHub",
+    "dontHaveAccount": "មិនមានគណនី?",
+    "signUp": "ចុះឈ្មោះ",
+    "loginSuccessful": "ចូលប្រើប្រាស់ជោគជ័យ!",
+    "welcomeBack": "សូមស្វាគមន៍ការត្រឡប់មកវិញ",
+    "loginFailed": "ចូលប្រើប្រាស់បរាជ័យ",
+    "emailOrPasswordIncorrect": "អ៊ីមែល ឬពាក្យសម្ងាត់មិនត្រឹមត្រូវ។"
   }
 }

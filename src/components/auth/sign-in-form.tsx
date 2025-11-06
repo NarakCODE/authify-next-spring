@@ -19,6 +19,9 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { LocaleLink } from "@/components/locale-link";
 import { authStorage } from "@/lib/auth";
 import { useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "@/hooks/use-translation";
+import { Eye, EyeOff } from "lucide-react";
+import { useState } from "react";
 
 export function SignInForm({
   className,
@@ -28,6 +31,8 @@ export function SignInForm({
   const searchParams = useSearchParams();
   const queryClient = useQueryClient();
   const { mutate: signIn, isPending } = useSignIn();
+  const { t } = useTranslation();
+  const [showPassword, setShowPassword] = useState(false);
 
   const {
     register,
@@ -46,8 +51,8 @@ export function SignInForm({
         // Invalidate auth query to refetch
         queryClient.invalidateQueries({ queryKey: ["auth", "check"] });
 
-        toast.success("Login successful!", {
-          description: `Welcome back, ${response.email}`,
+        toast.success(t("auth.loginSuccessful"), {
+          description: `${t("auth.welcomeBack")}, ${response.email}`,
         });
 
         // Redirect to dashboard or redirect URL
@@ -55,8 +60,8 @@ export function SignInForm({
         router.push(redirect);
       },
       onError: (error) => {
-        toast.error("Login failed", {
-          description: error.message || "Email or password is incorrect.",
+        toast.error(t("auth.loginFailed"), {
+          description: error.message || t("auth.emailOrPasswordIncorrect"),
         });
       },
     });
@@ -70,17 +75,17 @@ export function SignInForm({
     >
       <FieldGroup>
         <div className="flex flex-col items-center gap-1 text-center">
-          <h1 className="text-2xl font-bold">Login to your account</h1>
+          <h1 className="text-2xl font-bold">{t("auth.login")}</h1>
           <p className="text-muted-foreground text-sm text-balance">
-            Enter your email below to login to your account
+            {t("auth.loginDescription")}
           </p>
         </div>
         <Field>
-          <FieldLabel htmlFor="email">Email</FieldLabel>
+          <FieldLabel htmlFor="email">{t("auth.email")}</FieldLabel>
           <Input
             id="email"
             type="email"
-            placeholder="m@example.com"
+            placeholder={t("auth.emailPlaceholder")}
             {...register("email")}
             disabled={isPending}
           />
@@ -92,20 +97,35 @@ export function SignInForm({
         </Field>
         <Field>
           <div className="flex items-center">
-            <FieldLabel htmlFor="password">Password</FieldLabel>
+            <FieldLabel htmlFor="password">{t("auth.password")}</FieldLabel>
             <LocaleLink
               href="/forgot-password"
               className="ml-auto text-sm underline-offset-4 hover:underline"
             >
-              Forgot your password?
+              {t("auth.forgotPassword")}
             </LocaleLink>
           </div>
-          <Input
-            id="password"
-            type="password"
-            {...register("password")}
-            disabled={isPending}
-          />
+          <div className="relative">
+            <Input
+              id="password"
+              type={showPassword ? "text" : "password"}
+              {...register("password")}
+              disabled={isPending}
+              className="pr-10"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+              disabled={isPending}
+            >
+              {showPassword ? (
+                <EyeOff className="h-4 w-4" />
+              ) : (
+                <Eye className="h-4 w-4" />
+              )}
+            </button>
+          </div>
           {errors.password && (
             <FieldDescription className="text-destructive">
               {errors.password.message}
@@ -114,10 +134,10 @@ export function SignInForm({
         </Field>
         <Field>
           <Button type="submit" disabled={isPending}>
-            {isPending ? "Logging in..." : "Login"}
+            {isPending ? t("auth.loggingIn") : t("auth.login")}
           </Button>
         </Field>
-        <FieldSeparator>Or continue with</FieldSeparator>
+        <FieldSeparator>{t("auth.orContinueWith")}</FieldSeparator>
         <Field>
           <Button variant="outline" type="button" disabled={isPending}>
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -126,15 +146,15 @@ export function SignInForm({
                 fill="currentColor"
               />
             </svg>
-            Login with GitHub
+            {t("auth.loginWithGitHub")}
           </Button>
           <FieldDescription className="text-center">
-            Don&apos;t have an account?{" "}
+            {t("auth.dontHaveAccount")}{" "}
             <LocaleLink
               href="/register"
               className="text-primary hover:underline"
             >
-              Sign up
+              {t("auth.signUp")}
             </LocaleLink>
           </FieldDescription>
         </Field>
