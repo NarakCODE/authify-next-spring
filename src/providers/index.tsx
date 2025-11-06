@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { LocaleType } from "@/types";
 import { useState } from "react";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 
 export function Providers({
   children,
@@ -33,6 +34,7 @@ export function Providers({
         disableTransitionOnChange
       >
         {children}
+        <ConfirmDialog />
         <ReactQueryDevtools initialIsOpen={false} />
       </ThemeProvider>
     </QueryClientProvider>

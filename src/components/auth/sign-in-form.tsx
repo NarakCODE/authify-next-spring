@@ -15,15 +15,18 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { SignInSchema, SignInSchemaType } from "@/schemas/sign-in-schema";
 import { useSignIn } from "@/hooks/use-sign-in";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { LocaleLink } from "@/components/locale-link";
 import { authStorage } from "@/lib/auth";
+import { useQueryClient } from "@tanstack/react-query";
 
 export function SignInForm({
   className,
   ...props
 }: React.ComponentProps<"form">) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const queryClient = useQueryClient();
   const { mutate: signIn, isPending } = useSignIn();
 
   const {
@@ -40,12 +43,16 @@ export function SignInForm({
         // Store token
         authStorage.setToken(response.token);
 
+        // Invalidate auth query to refetch
+        queryClient.invalidateQueries({ queryKey: ["auth", "check"] });
+
         toast.success("Login successful!", {
           description: `Welcome back, ${response.email}`,
         });
 
-        // Redirect to dashboard
-        router.push("/dashboard");
+        // Redirect to dashboard or redirect URL
+        const redirect = searchParams.get("redirect") || "/dashboard";
+        router.push(redirect);
       },
       onError: (error) => {
         toast.error("Login failed", {

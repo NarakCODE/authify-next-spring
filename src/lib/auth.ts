@@ -19,4 +19,12 @@ export const authStorage = {
   isAuthenticated: (): boolean => {
     return !!authStorage.getToken();
   },
+
+  logout: (): void => {
+    authStorage.removeToken();
+    // Clear any other auth-related data
+    if (typeof window !== "undefined") {
+      sessionStorage.removeItem("verifyEmail");
+    }
+  },
 };

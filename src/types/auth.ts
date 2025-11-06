@@ -37,3 +37,11 @@ export interface SignInResponse {
   email: string;
   token: string;
 }
+
+export interface AuthCheckResponse {
+  authenticated: boolean;
+}
+
+export interface LogoutResponse {
+  message: string;
+}
