@@ -25,6 +25,7 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar";
+import { useProfile } from "@/hooks/use-profile";
 
 // This is sample data.
 const data = {
@@ -157,6 +158,18 @@ const data = {
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { profile, isLoading } = useProfile();
+
+  // Create user object with profile data or fallback
+  const user = profile
+    ? {
+        name: profile.name,
+        email: profile.email,
+        avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(profile.name)}`,
+        isVerified: profile.isAccountVerified,
+      }
+    : data.user;
+
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
@@ -167,7 +180,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavProjects projects={data.projects} />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        {!isLoading && <NavUser user={user} />}
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

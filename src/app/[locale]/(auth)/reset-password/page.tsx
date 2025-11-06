@@ -1,9 +1,9 @@
-import { ForgotPasswordForm } from "@/components/auth/forgot-password-form";
+import { ResetPasswordForm } from "@/components/auth/reset-password-form";
 import { PublicRoute } from "@/components/auth/public-route";
 import { GalleryVerticalEnd } from "lucide-react";
 import Image from "next/image";
 
-function ForgotPasswordPage() {
+function ResetPasswordPage() {
   return (
     <PublicRoute>
       <div className="grid min-h-svh lg:grid-cols-2">
@@ -18,7 +18,7 @@ function ForgotPasswordPage() {
           </div>
           <div className="flex flex-1 items-center justify-center">
             <div className="w-full max-w-xs">
-              <ForgotPasswordForm />
+              <ResetPasswordForm />
             </div>
           </div>
         </div>
@@ -36,4 +36,4 @@ function ForgotPasswordPage() {
   );
 }
 
-export default ForgotPasswordPage;
+export default ResetPasswordPage;

@@ -10,6 +10,11 @@ import {
   SignInResponse,
   AuthCheckResponse,
   LogoutResponse,
+  SendResetOtpRequest,
+  SendResetOtpResponse,
+  ResetPasswordRequest,
+  ResetPasswordResponse,
+  UserProfile,
 } from "@/types/auth";
 
 export const authService = {
@@ -28,7 +33,7 @@ export const authService = {
   },
 
   resendOtp: async (data: ResendOtpRequest): Promise<ResendOtpResponse> => {
-    return apiClient<ResendOtpResponse>("/api/v1.0/resend-otp", {
+    return apiClient<ResendOtpResponse>("/api/v1.0/resend-verification-otp", {
       method: "POST",
       body: JSON.stringify(data),
     });
@@ -55,6 +60,32 @@ export const authService = {
   logout: async (): Promise<LogoutResponse> => {
     return apiClient<LogoutResponse>("/api/v1.0/logout", {
       method: "POST",
+    });
+  },
+
+  sendResetOtp: async (
+    data: SendResetOtpRequest
+  ): Promise<SendResetOtpResponse> => {
+    return apiClient<SendResetOtpResponse>(
+      `/api/v1.0/send-reset-otp?email=${encodeURIComponent(data.email)}`,
+      {
+        method: "POST",
+      }
+    );
+  },
+
+  resetPassword: async (
+    data: ResetPasswordRequest
+  ): Promise<ResetPasswordResponse> => {
+    return apiClient<ResetPasswordResponse>("/api/v1.0/reset-password", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  },
+
+  getProfile: async (): Promise<UserProfile> => {
+    return apiClient<UserProfile>("/api/v1.0/profile", {
+      method: "GET",
     });
   },
 };

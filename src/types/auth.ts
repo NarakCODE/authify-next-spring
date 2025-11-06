@@ -45,3 +45,28 @@ export interface AuthCheckResponse {
 export interface LogoutResponse {
   message: string;
 }
+
+export interface SendResetOtpRequest {
+  email: string;
+}
+
+export interface SendResetOtpResponse {
+  message: string;
+}
+
+export interface ResetPasswordRequest {
+  email: string;
+  otp: string;
+  newPassword: string;
+}
+
+export interface ResetPasswordResponse {
+  message: string;
+}
+
+export interface UserProfile {
+  userId: string;
+  name: string;
+  email: string;
+  isAccountVerified: boolean;
+}
