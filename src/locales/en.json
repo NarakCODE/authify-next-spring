@@ -30,5 +30,30 @@
     "welcomeBack": "Welcome back",
     "loginFailed": "Login failed",
     "emailOrPasswordIncorrect": "Email or password is incorrect."
+  },
+  "home": {
+    "title": "Welcome to Authify",
+    "subtitle": "Secure authentication system with email verification, password reset, and JWT-based session management.",
+    "signIn": "Sign In",
+    "createAccount": "Create Account",
+    "features": {
+      "secure": {
+        "title": "Secure by Default",
+        "description": "Industry-standard security with JWT tokens and encrypted passwords"
+      },
+      "fast": {
+        "title": "Fast & Reliable",
+        "description": "Quick authentication with email OTP verification in seconds"
+      },
+      "recovery": {
+        "title": "Password Recovery",
+        "description": "Easy password reset with secure OTP-based verification"
+      }
+    }
+  },
+  "footer": {
+    "copyright": "All rights reserved.",
+    "builtWith": "Built with",
+    "by": "by"
   }
 }
